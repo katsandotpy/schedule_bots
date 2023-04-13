@@ -1,3 +1,4 @@
+import config
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
@@ -6,7 +7,7 @@ import mysql.connector
 from mysql.connector import Error
 
 
-TOKEN = '6109872161:AAEGnoPlbSjftA8CKx9xS0Y8LIBnPTE6DJ4'
+TOKEN = config.TOKEN
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
@@ -56,7 +57,7 @@ def finduser(id):
 
     for user in users:
         print(user)
-        if user[0]==id:
+        if str(user[0])==id:
             return True
     return False
 
@@ -96,8 +97,62 @@ def delete(id):
         execute_query(connection, delete_users)
     except: pass
 
+def infouser(id):
+    select_users = f"SELECT * FROM `userdata`"
+    users = execute_read_query(connection, select_users)
 
-def yadolbaeb(forma, napravlenie):
+    for user in users:
+        print(user)
+        mass = [str(user[1]), str(user[2])]
+        return mass
+    return False
+
+def distribution(id):
+    mass = infouser(id)
+    if mass[0]=='pi' and mass[1]=='ochn':
+        doc = open('files/' + 'очн. Прикладная информатика 1-4 курс Расписание Весна 2023.docx', 'rb')
+        return doc
+    elif mass[0]=='ur' and mass[1]=='ochn':
+        doc = open('files/' +'Юриспруденция 1-4 курс Расписание Весна 2023.docx', 'rb')
+        return doc
+    elif mass[0]=='ek' and mass[1]=='ochn':
+        doc = open('files/' + 'очн. Экономика 1-4 курс Расписание Весна 2023.docx', 'rb')
+        return doc
+    elif mass[0]=='rso' and mass[1]=='ochn':
+        doc = open('files/' + 'очн. РСО 3 курс Расписание Весна 2023 (2).docx', 'rb')
+        return doc
+    elif mass[0]=='fin' and mass[1]=='ochn':
+        doc = open('files/' + 'о СПО 1-2 курс  Расписание ВЕСНА 2023 .docx', 'rb')
+        return doc
+    elif mass[0]=='ped' and mass[1]=='zaochn':
+        doc = open('files/статья.docx', 'rb')
+        return doc
+    elif mass[0]=='rso' and mass[1]=='zaochn':
+        doc = open('files/статья.docx', 'rb')
+        return doc
+    elif mass[0]=='gmu' and mass[1]=='zaochn':
+        doc = open('files/статья.docx', 'rb')
+        return doc
+    elif mass[0]=='mj' and mass[1]=='zaochn':
+        doc = open('files/статья.docx', 'rb')
+        return doc
+    elif mass[0]=='ek' and mass[1]=='zaochn':
+        doc = open('files/статья.docx', 'rb')
+        return doc
+    elif mass[0]=='ur' and mass[1]=='ochzaochn':
+        doc = open('files/статья.docx', 'rb')
+        return doc
+    elif mass[0]=='gmu' and mass[1]=='ochzaochn':
+        doc = open('files/статья.docx', 'rb')
+        return doc
+    elif mass[0]=='ek' and mass[1]=='ochzaochn':
+        doc = open('files/статья.docx', 'rb')
+        return doc
+    elif mass[0]=='pi' and mass[1]=='ochzaochn':
+        doc = open('files/статья.docx', 'rb')
+        return doc
+
+def change(forma, napravlenie):
     if forma == 'Очная':
         form = 'ochn'
     elif forma == 'Заочная':
@@ -122,9 +177,13 @@ def yadolbaeb(forma, napravlenie):
         napr = 'mj'
     return form, napr
 
+
+
 # команда start
 @dp.message_handler(commands=['start'])
 async def cmd_start(message: types.Message):
+    tgid = str(message.from_user.id)
+    findid = finduser(tgid)
     kb = [
         [
             types.KeyboardButton(text="Да."),
@@ -137,191 +196,8 @@ async def cmd_start(message: types.Message):
     await message.answer(
         "Привет! Я занимаюсь рассылкой расписания, для начала необходимо пройти авторизацию. Продолжить?",
         reply_markup=keyboard)
-
-
-    @dp.message_handler(text=["Да."])
-    async def yes(message: types.Message):
-        kb = [
-            [
-                types.KeyboardButton(text="Очная"),
-                types.KeyboardButton(text="Очно-заочная"),
-                types.KeyboardButton(text="Заочная"),
-            ],
-        ]
-        keyboard = types.ReplyKeyboardMarkup(
-            keyboard=kb,
-            resize_keyboard=True,
-        )
-        await message.reply("Отлично. Выберите вашу форму обучения.", reply_markup=keyboard)
-
-
-        @dp.message_handler(text=['Очная', 'Заочная', 'Очно-заочная'])
-        async def formmm(message: types.Message):
-            kb = [
-                [
-                    types.KeyboardButton(text="ПИ"),
-                    types.KeyboardButton(text="ЮР"),
-                    types.KeyboardButton(text="ЭК"),
-                    types.KeyboardButton(text="РС"),
-                    types.KeyboardButton(text="ФН"),
-                    types.KeyboardButton(text="ГМ"),
-                    types.KeyboardButton(text="ПО"),
-                    types.KeyboardButton(text="МЖ"),
-                ],
-            ]
-            keyboard = types.ReplyKeyboardMarkup(
-                keyboard=kb,
-                resize_keyboard=True,
-            )
-            forma = message.text
-            print(forma)
-
-            await message.reply("Теперь выберите ваше направление подготовки", reply_markup=keyboard)
-
-            @dp.message_handler(text=['ПИ', 'ЮР', 'ЭК', 'РС', 'ФН', 'ГМ', 'ПО', 'МЖ'])
-            async def jjj(message: types.Message):
-                tgid = message.from_user.id
-                print(tgid)
-
-                napravlenie = message.text
-                print(napravlenie)
-
-                mass = [yadolbaeb(forma, napravlenie)]
-                print(mass)
-                form = mass[0][0]
-                napr = mass[0][1]
-                findd = findfull(napr, form, 'userdatafull')
-
-                count = 0
-
-                findinuser = finduser(tgid)
-                if findinuser == True:
-                    count+=1
-                    await message.answer(
-                        "Вы уже авторизованы. Если вы ошиблись группой, вы можете очистить данные командой /deletedata и пройти авторизацию заново.",
-                        reply_markup=keyboard)
-
-                print('findd', findd)
-                if findd == True and count == 0:
-                    create(tgid, napr, form)
-                    kb = [
-                        [
-                            types.KeyboardButton(text="Продолжить"),
-                        ],
-                    ]
-                    keyboard = types.ReplyKeyboardMarkup(
-                        keyboard=kb,
-                        resize_keyboard=True,
-                    )
-                    await message.answer(
-                        "Вы авторизованы. Вы можете запросить расписание, обновленное расписание будут приходить автоматически.",
-                        reply_markup=keyboard)
-
-
-                @dp.message_handler(text=["Продолжить"])
-                async def prod(message: types.Message):
-                    kb = [
-                        [
-                            types.KeyboardButton(text="Запросить расписание"),
-                            types.KeyboardButton(text="Информация")
-                        ],
-                    ]
-                    keyboard = types.ReplyKeyboardMarkup(
-                        keyboard=kb,
-                        resize_keyboard=True,
-                    )
-                    await message.answer("Выберите действие", reply_markup=keyboard)
-
-                    # пнгшка с расписанием
-                    @dp.message_handler(text=["Запросить расписание"])
-                    async def schuedle(message: types.Message):
-                        photo = open('testfile.png', 'rb')
-                        await bot.send_photo(chat_id=message.chat.id, photo=photo)
-
-                    #информация
-                    @dp.message_handler(text=["Информация"])
-                    async def information(message: types.Message):
-                        await message.reply(
-                            "Это бот для студентов ННГУ ДФ. Вам будет автоматически приходить актуальное расписание, в случае необходимости вы можете запросить повторную отправку. Если вы ошиблись группой, вы можете очистить данные с помощью команды /deletedata и заново пройти авторизацию.")
-
-#удаление записи в бд
-@dp.message_handler(commands=['deletedata'])
-async def cmd_start(message: types.Message):
-    tgid = str(message.from_user.id)
-    if finduser(tgid) == True:
-        delete(tgid)
-        await message.reply(
-            "Данные удалены. Вы можете заново пройти авторизацию, использовав команду /start")
-
-
-
-
-"""
-sss = True
-if sss == True:
-    @dp.message_handler(text=["Пизда"])
-    async def success(message: types.Message):
-        kb = [
-            [
-                types.KeyboardButton(text="Продолжить"),
-            ],
-        ]
-        keyboard = types.ReplyKeyboardMarkup(
-            keyboard=kb,
-            resize_keyboard=True,
-        )
-        await message.answer("Вы авторизованы. Вы можете запросить расписание, обновленное расписание будут приходить автоматически.", reply_markup=keyboard)
-
-
-        @dp.message_handler(text=["Продолжить"])
-        async def prod(message: types.Message):
-            kb = [
-                [
-                    types.KeyboardButton(text="Запросить расписание"),
-                    types.KeyboardButton(text="Информация")
-                ],
-            ]
-            keyboard = types.ReplyKeyboardMarkup(
-                keyboard=kb,
-                resize_keyboard=True,
-            )
-            await message.answer("Выберите действие", reply_markup=keyboard)
-
-            #пнгшка с расписанием
-            @dp.message_handler(text=["Запросить расписание"])
-            async def schuedle(message: types.Message):
-                photo = open('testfile.png', 'rb')
-                await bot.send_photo(chat_id=message.chat.id, photo=photo)
-
-
-            @dp.message_handler(text=["Информация"])
-            async def information(message: types.Message):
-                await message.reply("Это бот для студентов ННГУ ДФ. Вам будет автоматически приходить актуальное расписание, в случае необходимости вы можете запросить повторную отправку. Если вы ошиблись группой, вы можете очистить данные с помощью команды /deletedata и заново пройти авторизацию.")
-
-            @dp.message_handler(commands=['deletedata'])
-            async def cmd_start(message: types.Message):
-                tgid = str(message.from_user.id)
-                if finduser(tgid)==True:
-                    delete(tgid)
-                    await message.reply("Данные удалены. Вы можете заново пройти авторизацию, использовав команду /start")
-
-elif sss == False:
-    # команда start
-    @dp.message_handler(commands=['start'])
-    async def cmd_start(message: types.Message):
-        kb = [
-            [
-                types.KeyboardButton(text="Да."),
-            ],
-        ]
-        keyboard = types.ReplyKeyboardMarkup(
-            keyboard=kb,
-            resize_keyboard=True,
-        )
-        await message.answer(
-            "Привет! Я занимаюсь рассылкой расписания, для начала необходимо пройти авторизацию. Продолжить?",
-            reply_markup=keyboard)
-
+    #если в базе данных не найдено айди
+    if findid==False:
 
         @dp.message_handler(text=["Да."])
         async def yes(message: types.Message):
@@ -360,26 +236,100 @@ elif sss == False:
                 forma = message.text
                 print(forma)
 
-                await message.reply("Теперь выберите ваше направление подготовки", reply_markup=keyboard)
+                await message.reply("Теперь выберите ваше направление подготовки.", reply_markup=keyboard)
 
                 @dp.message_handler(text=['ПИ', 'ЮР', 'ЭК', 'РС', 'ФН', 'ГМ', 'ПО', 'МЖ'])
                 async def jjj(message: types.Message):
-                    tgid = message.from_user.id
-                    print(tgid)
 
                     napravlenie = message.text
                     print(napravlenie)
 
-                    mass = [yadolbaeb(forma, napravlenie)]
+                    mass = [change(forma, napravlenie)]
                     print(mass)
                     form = mass[0][0]
                     napr = mass[0][1]
-
                     findd = findfull(napr, form, 'userdatafull')
-                    if findd == True:
-                        create(tgid, napr, form)
-                        await message.reply("Вы авторизованы.", reply_markup=types.ReplyKeyboardRemove())
-"""
+
+                    create(tgid, napr, form)
+                    kb = [
+                        [
+                            types.KeyboardButton(text="Продолжить"),
+                        ],
+                    ]
+                    keyboard = types.ReplyKeyboardMarkup(
+                        keyboard=kb,
+                        resize_keyboard=True,
+                    )
+                    await message.answer(
+                        "Вы авторизованы. Вы можете запросить расписание, обновленное расписание будут приходить автоматически.",
+                        reply_markup=keyboard)
+
+
+                    @dp.message_handler(text=["Продолжить"])
+                    async def prod(message: types.Message):
+                        kb = [
+                            [
+                                types.KeyboardButton(text="Запросить расписание"),
+                                types.KeyboardButton(text="Информация")
+                            ],
+                        ]
+                        keyboard = types.ReplyKeyboardMarkup(
+                            keyboard=kb,
+                            resize_keyboard=True,
+                        )
+                        await message.answer("Выберите действие.", reply_markup=keyboard)
+
+                        # файл с расписанием
+                        @dp.message_handler(text=["Запросить расписание"])
+                        async def schuedle(message: types.Message):
+                            doc = distribution(tgid)
+                            await bot.send_document(chat_id=message.chat.id, document=doc)
+
+                        #информация
+                        @dp.message_handler(text=["Информация"])
+                        async def information(message: types.Message):
+                            await message.reply(
+                                "Это бот для студентов ННГУ ДФ. Вам будет автоматически приходить актуальное расписание, в случае необходимости вы можете запросить повторную отправку. Если вы ошиблись группой, вы можете очистить данные с помощью команды /deletedata и заново пройти авторизацию.")
+
+    #если в базе данных есть айди
+    elif findid==True:
+        @dp.message_handler(text=["Да."])
+        async def yes1(message: types.Message):
+            kb = [
+                [
+                    types.KeyboardButton(text="Запросить расписание"),
+                    types.KeyboardButton(text="Информация")
+                ],
+            ]
+            keyboard = types.ReplyKeyboardMarkup(
+                keyboard=kb,
+                resize_keyboard=True,
+            )
+            await message.answer("Вы авторизованы. Выберите действие", reply_markup=keyboard)
+
+            # файл с расписанием
+            @dp.message_handler(text=["Запросить расписание"])
+            async def schuedle(message: types.Message):
+                doc = distribution(tgid)
+                await bot.send_document(chat_id=message.chat.id, document=doc)
+
+            # информация
+            @dp.message_handler(text=["Информация"])
+            async def information(message: types.Message):
+                await message.reply(
+                    "Это бот для студентов ННГУ ДФ. Вам будет автоматически приходить актуальное расписание, в случае необходимости вы можете запросить повторную отправку. Если вы ошиблись группой, вы можете очистить данные с помощью команды /deletedata и заново пройти авторизацию.")
+
+
+#удаление записи в бд
+@dp.message_handler(commands=['deletedata'])
+async def cmd_start(message: types.Message):
+    tgid = str(message.from_user.id)
+    if finduser(tgid) == True:
+        delete(tgid)
+        await message.reply(
+            "Данные удалены. Вы можете заново пройти авторизацию, использовав команду '/start'.")
+    else: await message.reply(
+            "Ваших данных нет в базе. Вы можете пройти авторизацию, использовав команду '/start'.")
 
 
 
