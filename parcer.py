@@ -10,6 +10,8 @@ import re
 from datetime import datetime
 from bs4 import BeautifulSoup
 import quopri
+from config import names
+from tst import main as mailing
 
 ENCODING = config.encoding
 
@@ -54,13 +56,11 @@ def get_attachments(msg):
             and "name" in part["Content-Type"]
             and part.get_content_disposition() == "attachment"
         ):
-            print('getfilename', part.get_filename())
-            print(base64.b64decode('=0L/QtdGC0LDQvdC6LnBkZg==').decode())
             print(decode_header(part.get_filename())[0][0].decode())
+
             str_pl = part["Content-Type"]
             str_pl = encode_att_names(str_pl)
             attachments.append(str_pl)
-            print(attachments)
     return attachments
 
 
@@ -148,6 +148,8 @@ def send_attach(msg, msg_subj):
             filename = from_subj_decode(filename)
             with open('files/' + filename, 'wb') as f:
                 f.write(part.get_payload(decode=True))
+            mailing(names[filename])
+
 
 
 def post_construct(msg_subj, msg_from, msg_email, letter_text, attachments):
@@ -226,12 +228,14 @@ def main():
         imap.logout()
     else:
         imap.logout()
-        sys.exit()
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except (Exception) as exp:
-        text = str("ошибка: " + str(exp))
-        print(traceback.format_exc())
+    while True:
+        try:
+            main()
+            print("passed",time.strftime('%c',time.localtime()))
+        except (Exception) as exp:
+            text = str("ошибка: " + str(exp))
+            print(traceback.format_exc())
+        time.sleep(300)
